@@ -6,18 +6,19 @@
 #include <stdint.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "mksmemoryloop.h"
 
 void* main_thread_function(void* ptr);
 
-uint8_t federates[MAX_FEDERATES];
-uint8_t frames[MAX_FEDERATES][FRAME_SIZE];  
+uint8_t __thread federates[MAX_FEDERATES];
+uint8_t __thread frames[MAX_FEDERATES][FRAME_SIZE];  
 
-pthread_t main_thread;
-bool is_running = false;
+pthread_t __thread main_thread;
+bool __thread is_running = false;
 
-bool quit_flag = false;
+bool __thread quit_flag = false;
 
 bool mksml_initialize() {
     printf("mks-memory-loop: initialize.\n");
@@ -54,4 +55,6 @@ void* main_thread_function(void* ptr) {
     while(!quit_flag){
         sleep(1);
     } 
+
+    return (void*)NULL;
 }
