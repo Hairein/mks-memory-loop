@@ -16,4 +16,8 @@ src/mksmemoryloop.po: src/mksmemoryloop.c /usr/include/stdio.h \
   /usr/include/sys/unistd.h \
   /usr/home/mkoleoso/GitHub/mks-memory-loop/include/mksmemoryloop.h \
   /usr/include/stdbool.h \
-  /usr/home/mkoleoso/GitHub/mks-memory-loop/include/mksstructures.h
+  /usr/home/mkoleoso/GitHub/mks-memory-loop/include/mksstructures.h \
+  /usr/include/sys/socket.h /usr/include/sys/_iovec.h \
+  /usr/include/machine/_align.h /usr/include/x86/_align.h \
+  /usr/include/sys/_sockaddr_storage.h /usr/include/netinet/in.h \
+  /usr/include/netinet6/in6.h /usr/include/arpa/inet.h
