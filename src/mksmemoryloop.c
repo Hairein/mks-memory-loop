@@ -26,7 +26,7 @@ bool mksml_initialize() {
     memset(federates, 0, sizeof(uint8_t) * MAX_FEDERATES);
     memset(frames, 0, sizeof(uint8_t) * (MAX_FEDERATES * FRAME_SIZE));
 
-    int thread_create_result = pthread_create(&main_thread, NULL, main_thread_function, (void*) NULL);
+    int thread_create_result = pthread_create(&main_thread, NULL, main_thread_function, (void*) &quit_flag);
     if(thread_create_result != 0) {
         printf("mks-memory-loop: Error creating main thread.\n");
         return false;
@@ -45,6 +45,8 @@ void mksml_uninitialize() {
     if(is_running) { 
         quit_flag = true;
 
+        printf("mks-memory-loop: awaiting shutdown.\n");
+
         pthread_join(main_thread, NULL);
     }
 
@@ -52,7 +54,9 @@ void mksml_uninitialize() {
 } 
 
 void* main_thread_function(void* ptr) {
-    while(!quit_flag){
+    bool* quit_flag_ptr = (bool*)ptr;
+
+    while(!*quit_flag_ptr){
         sleep(1);
     } 
 
