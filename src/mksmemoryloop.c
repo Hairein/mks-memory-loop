@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "mksmemoryloop.h"
+#include "mksstructures.h"
 
 void* main_thread_function(void* ptr);
 
@@ -18,15 +19,23 @@ uint8_t __thread frames[MAX_FEDERATES][FRAME_SIZE];
 pthread_t __thread main_thread;
 bool __thread is_running = false;
 
-bool __thread quit_flag = false;
+struct ThreadInfoBlock __thread threadInfoBlock;
 
-bool mksml_initialize() {
+bool mksml_initialize(uint8_t platform_index, uint16_t frame_interval_ms) {
     printf("mks-memory-loop: initialize.\n");
 
     memset(federates, 0, sizeof(uint8_t) * MAX_FEDERATES);
     memset(frames, 0, sizeof(uint8_t) * (MAX_FEDERATES * FRAME_SIZE));
 
-    int thread_create_result = pthread_create(&main_thread, NULL, main_thread_function, (void*) &quit_flag);
+    memset(&threadInfoBlock, 0, sizeof(struct ThreadInfoBlock));
+    threadInfoBlock.quit_flag = false;
+    threadInfoBlock.platform_index = platform_index;
+    threadInfoBlock.frame_interval_ms = frame_interval_ms;
+
+    printf("mks-memory-loop: platform_index=%d.\n", platform_index);
+    printf("mks-memory-loop: frame_interval_ms=%d.\n", frame_interval_ms);
+
+    int thread_create_result = pthread_create(&main_thread, NULL, main_thread_function, (void*) &threadInfoBlock);
     if(thread_create_result != 0) {
         printf("mks-memory-loop: Error creating main thread.\n");
         return false;
@@ -41,9 +50,9 @@ bool mksml_initialize() {
 
 void mksml_uninitialize() {
     printf("mks-memory-loop: uninitialize.\n");
-
+    
     if(is_running) { 
-        quit_flag = true;
+        threadInfoBlock.quit_flag = true;
 
         printf("mks-memory-loop: awaiting shutdown.\n");
 
@@ -54,10 +63,12 @@ void mksml_uninitialize() {
 } 
 
 void* main_thread_function(void* ptr) {
-    bool* quit_flag_ptr = (bool*)ptr;
+    struct ThreadInfoBlock* threadInfoBlock_ptr = ptr;
+ 
+    useconds_t sleep_interval_max = threadInfoBlock_ptr->frame_interval_ms * MICROSECONDS_PER_MILLISECOND;
 
-    while(!*quit_flag_ptr){
-        sleep(1);
+    while(!threadInfoBlock_ptr->quit_flag){
+        usleep(sleep_interval_max);
     } 
 
     return (void*)NULL;

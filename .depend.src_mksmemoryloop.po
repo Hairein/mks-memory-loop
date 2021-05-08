@@ -15,4 +15,5 @@ src/mksmemoryloop.po: src/mksmemoryloop.c /usr/include/stdio.h \
   /usr/include/sys/select.h /usr/include/sys/_timeval.h \
   /usr/include/sys/unistd.h \
   /usr/home/mkoleoso/GitHub/mks-memory-loop/include/mksmemoryloop.h \
-  /usr/include/stdbool.h
+  /usr/include/stdbool.h \
+  /usr/home/mkoleoso/GitHub/mks-memory-loop/include/mksstructures.h

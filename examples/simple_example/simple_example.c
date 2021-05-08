@@ -9,7 +9,7 @@
 int main(int argc, char *argv[]) {
     printf("Simple example using mksmemoryloop.\n");
 
-    mksml_initialize();
+    mksml_initialize(3, 20);
     
     // Wait for key
     printf("Press ENTER to exit.\n");
