@@ -10,7 +10,9 @@
 			"socket.h": "c",
 			"in.h": "c",
 			"inet.h": "c",
-			"unistd.h": "c"
+			"unistd.h": "c",
+			"mksmemoryloop.h": "c",
+			"stdio.h": "c"
 		}
 	}
 }

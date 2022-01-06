@@ -2,8 +2,6 @@
 // Author: Micah Koleoso Software, 2021
 
 #define _DEFAULT_SOURCE
-//#define __USE_MISC
-// #define __USE_XOPEN
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +10,6 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -27,21 +24,102 @@
 #define SLOT_CONNECTED 2
 #define SLOT_ERRORED 3
 
+uint8_t mksml_initialize_internal(uint8_t platform_index, uint16_t frame_interval_ms, char hostnames[MKS_MAX_FEDERATES][MKS_MAX_ADDRESS_LENGTH], uint16_t* ports, uint8_t nos_hosts);
+
 void* main_thread_function(void* ptr);
 
 void handle_external_frame(uint8_t platform_index, struct ThreadInfoBlock* threadInfoBlock_ptr);
 void handle_internal_frame(uint8_t platform_index, struct ThreadInfoBlock* threadInfoBlock_ptr);
+
+bool read_next_line_int(FILE * fp, int* value);
+bool read_next_line_string(FILE * fp, char* text);
 
 pthread_t __thread main_thread;
 bool __thread is_running = false;
 
 struct ThreadInfoBlock __thread threadInfoBlock;
 
-uint8_t mksml_initialize(uint8_t platform_index, uint16_t frame_interval_ms, char** hostnames, uint16_t* ports, uint8_t nos_hosts) {
-    if(nos_hosts > MKS_MAX_FEDERATES){
-        return MKS_ERROR_TOO_MANY_HOSTS;
+uint8_t mksml_initialize(char* cfg_filename)
+{
+    FILE * fp;
+    int tmp_int;
+    bool parse_successful = true;
+
+    uint8_t nos_hosts;
+    char hostnames[MKS_MAX_FEDERATES][MKS_MAX_ADDRESS_LENGTH];
+    uint16_t ports[MKS_MAX_FEDERATES];
+    uint8_t platform_index;
+    uint16_t frame_interval_ms;
+
+    memset(hostnames, 0, sizeof(char) * (MKS_MAX_FEDERATES * MKS_MAX_ADDRESS_LENGTH));
+
+    fp = fopen(cfg_filename, "r");
+    if (fp == NULL) return MKS_ERROR_READING_CFG_FILE;
+
+    if(!read_next_line_int(fp, &tmp_int) || tmp_int < 1 || tmp_int >= MKS_MAX_FEDERATES) {
+        fclose(fp);
+        return MKS_ERROR_READING_CFG_FILE;
+    }
+    nos_hosts = tmp_int;
+
+    for(size_t index = 0;index < nos_hosts;index++) {
+        if(!read_next_line_string(fp, &hostnames[index][0])) {
+            parse_successful = false;
+            break;
+        }
+
+        if(!read_next_line_int(fp, &tmp_int)) {
+            parse_successful = false;
+            break;
+        }
+        ports[index] = tmp_int;
+    }
+
+    if(!parse_successful) {
+        fclose(fp);
+        return MKS_ERROR_READING_CFG_FILE;
+    }
+
+    if(!read_next_line_int(fp, &tmp_int)) {
+        fclose(fp);
+        return MKS_ERROR_READING_CFG_FILE;
+    }
+    platform_index = tmp_int;
+
+    if(!read_next_line_int(fp, &tmp_int)) {
+        fclose(fp);
+        return MKS_ERROR_READING_CFG_FILE;
+    }
+    frame_interval_ms = tmp_int;
+
+    fclose(fp);
+
+    uint8_t result = mksml_initialize_internal(platform_index, frame_interval_ms, hostnames, ports, nos_hosts);
+
+    return result;
+}
+
+void mksml_uninitialize() {
+    printf("mks-memory-loop: uninitialize.\n");
+ 
+    if(is_running) { 
+        threadInfoBlock.quit_flag = true;
+
+        printf("mks-memory-loop: awaiting shutdown.\n");
+
+        pthread_join(main_thread, NULL);
+    }
+   
+    for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++) {
+        if(threadInfoBlock.sockets[federate_index] != -1) { 
+            close(threadInfoBlock.sockets[federate_index]); 
+        } 
     } 
 
+    printf("mks-memory-loop: shutdown.\n");
+} 
+
+uint8_t mksml_initialize_internal(uint8_t platform_index, uint16_t frame_interval_ms, char hostnames[MKS_MAX_FEDERATES][MKS_MAX_ADDRESS_LENGTH], uint16_t* ports, uint8_t nos_hosts) {
     printf("mks-memory-loop: initialize.\n");
 
     memset(&threadInfoBlock, 0, sizeof(struct ThreadInfoBlock));
@@ -80,26 +158,6 @@ uint8_t mksml_initialize(uint8_t platform_index, uint16_t frame_interval_ms, cha
     return MKS_NO_ERROR;
 } 
 
-void mksml_uninitialize() {
-    printf("mks-memory-loop: uninitialize.\n");
- 
-    if(is_running) { 
-        threadInfoBlock.quit_flag = true;
-
-        printf("mks-memory-loop: awaiting shutdown.\n");
-
-        pthread_join(main_thread, NULL);
-    }
-   
-    for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++) {
-        if(threadInfoBlock.sockets[federate_index] != -1) { 
-            close(threadInfoBlock.sockets[federate_index]); 
-        } 
-    } 
-
-    printf("mks-memory-loop: shutdown.\n");
-} 
-
 void* main_thread_function(void* ptr) {
     struct ThreadInfoBlock* threadInfoBlock_ptr = ptr;
  
@@ -107,7 +165,7 @@ void* main_thread_function(void* ptr) {
 
     while(!threadInfoBlock_ptr->quit_flag){
         for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++){
-            if(threadInfoBlock.federates[federate_index] == SLOT_ERRORED) { 
+            if(threadInfoBlock.federates[federate_index] != SLOT_CONNECTED) { 
                 continue;
             } 
 
@@ -131,3 +189,33 @@ void handle_external_frame(uint8_t platform_index, struct ThreadInfoBlock* threa
 
 void handle_internal_frame(uint8_t platform_index, struct ThreadInfoBlock* threadInfoBlock_ptr) {
 } 
+
+bool read_next_line_int(FILE * fp, int* value) {
+    char * line = NULL;
+    size_t len = 0;
+
+    if(fp == NULL) return false;
+
+    ssize_t read = getline(&line, &len, fp);
+    if(read == -1) return false;
+    *value = atoi(line);
+    
+    free(line);
+
+    return true;
+}
+
+bool read_next_line_string(FILE * fp, char* text) {
+    char * line = NULL;
+    size_t len = 0;
+
+    if(fp == NULL) return false;
+
+    ssize_t read = getline(&line, &len, fp);
+    if(read == -1 || read >= MKS_MAX_ADDRESS_LENGTH) return false;
+    strncpy(text, line, strlen(line));
+    
+    free(line);
+
+    return true;
+}

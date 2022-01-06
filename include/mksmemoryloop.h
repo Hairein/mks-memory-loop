@@ -9,11 +9,14 @@
 
 #define MKS_MAX_FEDERATES 16
 #define MKS_MAX_FRAME_SIZE 508
+#define MKS_MAX_ADDRESS_LENGTH 32
 
 #define MKS_NO_ERROR 0
 #define MKS_ERROR_TOO_MANY_HOSTS 1
+#define MKS_ERROR_READING_CFG_FILE 2
+#define MKS_ERROR_BAD_CFG_PARAMETER 3
 
-extern uint8_t mksml_initialize(uint8_t platform_index, uint16_t frame_interval_ms, char** hostnames, uint16_t* ports, uint8_t nos_hosts);
+extern uint8_t mksml_initialize(char* cfg_filename);
 extern void mksml_uninitialize();
 
 #endif
