@@ -1,12 +1,21 @@
 // mksmemoryloop.c
 // Author: Micah Koleoso Software, 2021
 
+#define _DEFAULT_SOURCE
+//#define __USE_MISC
+// #define __USE_XOPEN
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/types.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "mksmemoryloop.h"
 #include "mksstructures.h"

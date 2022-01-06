@@ -6,9 +6,21 @@ SHLIB_TEENY= 1
 
 SRCS= src/mksmemoryloop.c 
 INCS= include/mksmemoryloop.h include/mksstructures.h
+OBJS= mksmemoryloop.o 
 
-CFLAGS+= -std=c11 -Wall -ansi -pedantic -I${.CURDIR}/include
-CFLAGS+= -g -I/usr/include -I/usr/local/include -I${.CURDIR}/include/
-LDFLAGS+= -L/usr/lib -L/usr/local/lib -lc -lpthread
+CFLAGS+= -std=c11 -Wall -pedantic -g 
+CFLAGS+= -I./include -I/usr/include -I/usr/local/include
 
-.include <bsd.lib.mk>
+LDFLAGS+= -L/usr/lib -L/usr/local/lib -lpthread
+
+%.o : src/%.c ${INCS} ${SRCS}
+	gcc -c ${CFLAGS} $< -o $@ ${LDFLAGS}
+
+${LIB}.a : ${OBJS}
+	ar rcs ${LIB}.a ${OBJS}
+
+clean:
+	rm -f ${LIB}
+	rm -f *.o
+	rm -f *.a
+

@@ -12,6 +12,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "mksmemoryloop.h"
+
 struct ThreadInfoBlock {
     bool quit_flag;
     uint8_t platform_index;

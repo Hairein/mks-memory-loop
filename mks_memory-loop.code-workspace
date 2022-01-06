@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"mksstructures.h": "c",
+			"socket.h": "c",
+			"in.h": "c",
+			"inet.h": "c",
+			"unistd.h": "c"
+		}
+	}
+}
