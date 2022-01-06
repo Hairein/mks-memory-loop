@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+ #include <errno.h>
 
 #include "mksmemoryloop.h"
 #include "mksstructures.h"
@@ -136,13 +137,32 @@ uint8_t mksml_initialize_internal(uint8_t platform_index, uint16_t frame_interva
     for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++) {
         printf("mks-memory-loop: host=%d) %s:%d.\n", federate_index, hostnames[federate_index], ports[federate_index]);
 
-        if(inet_aton(hostnames[federate_index], threadInfoBlock.hosts[federate_index]) == 1) {  
-            threadInfoBlock.federates[federate_index] = SLOT_WAITING_TO_CONNECT;
-            threadInfoBlock.sockets[federate_index] = socket(AF_INET, SOCK_DGRAM, 0);        
-        } else {
-            threadInfoBlock.federates[federate_index] = SLOT_ERRORED;
-            threadInfoBlock.sockets[federate_index] = -1;        
-        } 
+        threadInfoBlock.federates[federate_index] = SLOT_WAITING_TO_CONNECT;
+
+        threadInfoBlock.sockets[federate_index] = socket(AF_INET, SOCK_DGRAM, 0);  
+
+        struct sockaddr_in addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(ports[federate_index]);
+        inet_aton(hostnames[federate_index], (struct in_addr*)&addr.sin_addr.s_addr);
+
+        if(bind(threadInfoBlock.sockets[federate_index], (struct sockaddr*)&addr, sizeof(addr)) == 0) {
+            threadInfoBlock.federates[federate_index] = SLOT_CONNECTED;
+        }
+        else {
+            threadInfoBlock.federates[federate_index] = SLOT_ERRORED; 
+
+            switch(errno)
+            {
+                case EACCES: printf("EACCES"); break; 
+                case EADDRINUSE: printf("EADDRINUSE"); break; 
+                case EBADF: printf("EBADF"); break; 
+                case EINVAL: printf("EINVAL"); break; 
+                case ENOTSOCK: printf("ENOTSOCK"); break; 
+                default: printf("default"); break;                   
+            }
+        }   
     } 
 
     int thread_create_result = pthread_create(&main_thread, NULL, main_thread_function, (void*) &threadInfoBlock);
@@ -163,20 +183,20 @@ void* main_thread_function(void* ptr) {
  
     useconds_t sleep_interval_max = threadInfoBlock_ptr->frame_interval_ms * MICROSECONDS_PER_MILLISECOND;
 
-    while(!threadInfoBlock_ptr->quit_flag){
-        for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++){
-            if(threadInfoBlock.federates[federate_index] != SLOT_CONNECTED) { 
+    while(!threadInfoBlock_ptr->quit_flag) {
+        for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++) {
+            if(threadInfoBlock.federates[federate_index] == SLOT_ERRORED) {
                 continue;
-            } 
+            }
 
-            if(federate_index != threadInfoBlock_ptr->platform_index){
+            if(federate_index != threadInfoBlock_ptr->platform_index) {
                 handle_external_frame(federate_index, threadInfoBlock_ptr);
             } else {
                 handle_internal_frame(federate_index, threadInfoBlock_ptr);
             } 
         } 
 
-        if(sleep_interval_max > 0){ 
+        if(sleep_interval_max > 0) { 
             usleep(sleep_interval_max);
         } 
     } 

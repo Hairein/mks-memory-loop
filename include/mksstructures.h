@@ -20,7 +20,6 @@ struct ThreadInfoBlock {
     uint16_t frame_interval_ms;
 
     uint8_t nos_hosts;
-    struct in_addr* hosts[MKS_MAX_FEDERATES];
 
     uint8_t federates[MKS_MAX_FEDERATES];
     int sockets[MKS_MAX_FEDERATES];
