@@ -4,7 +4,6 @@
 #ifndef MKS_MKSMEMORYLOOP_H
 #define MKS_MKSMEMORYLOOP_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #define MKS_MAX_FEDERATES 16

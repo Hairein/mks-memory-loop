@@ -27,7 +27,6 @@ struct ThreadInfoBlock {
     int max_socket_nr;
 
     uint8_t frames[MKS_MAX_FEDERATES][MKS_MAX_FRAME_SIZE];  
-    
 };
 
 #endif

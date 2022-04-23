@@ -4,9 +4,9 @@ SHLIB_MAJOR= 0
 SHLIB_MINOR= 0
 SHLIB_TEENY= 1
 
-SRCS= src/mksmemoryloop.c 
-INCS= include/mksmemoryloop.h include/mksstructures.h
-OBJS= mksmemoryloop.o 
+SRCS= src/mksmemoryloop.c src/main_thread.c src/file_read.c
+INCS= include/mksmemoryloop.h include/mksstructures.h include/main_thread.h include/file_read.h
+OBJS= mksmemoryloop.o main_thread.o file_read.o
 
 CFLAGS+= -std=c11 -Wall -pedantic -g 
 CFLAGS+= -I./include -I/usr/include -I/usr/local/include

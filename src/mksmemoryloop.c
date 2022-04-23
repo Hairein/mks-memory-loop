@@ -3,23 +3,17 @@
 
 #define _DEFAULT_SOURCE
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 #include <pthread.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <sys/param.h>
+#include <stdbool.h>
 
 #include "mksmemoryloop.h"
 #include "mksstructures.h"
-
-#define MICROSECONDS_PER_MILLISECOND 1000
+#include "main_thread.h"
+#include "file_read.h"
 
 #define SLOT_UNITIALIZED 0
 #define SLOT_WAITING_TO_CONNECT 1
@@ -28,22 +22,10 @@
 
 uint8_t mksml_initialize_internal(uint8_t platform_index, uint16_t frame_interval_ms, char hostnames[MKS_MAX_FEDERATES][MKS_MAX_ADDRESS_LENGTH], uint16_t* ports, uint8_t nos_hosts);
 
-void* main_thread_function(void* ptr);
-
-void handle_external_frame(uint8_t platform_index, fd_set* read_set, struct ThreadInfoBlock* threadInfoBlock_ptr);
-void handle_internal_frame(uint8_t platform_index, fd_set* write_set, struct ThreadInfoBlock* threadInfoBlock_ptr);
-
-bool read_next_line_int(FILE * fp, int* value);
-bool read_next_line_string(FILE * fp, char* text);
-
-int perform_select(fd_set* read_set, fd_set* write_set, fd_set* except_set, struct ThreadInfoBlock* threadInfoBlock_ptr);
-
 pthread_t __thread main_thread;
 bool __thread is_running = false;
 
 struct ThreadInfoBlock __thread threadInfoBlock;
-
-pthread_mutex_t access_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 uint8_t mksml_initialize(char* cfg_filename)
 {
@@ -186,121 +168,3 @@ uint8_t mksml_initialize_internal(uint8_t platform_index, uint16_t frame_interva
 
     return MKS_NO_ERROR;
 } 
-
-void* main_thread_function(void* ptr) {
-    struct ThreadInfoBlock* threadInfoBlock_ptr = ptr;
- 
-    useconds_t sleep_interval_max = threadInfoBlock_ptr->frame_interval_ms * MICROSECONDS_PER_MILLISECOND;
-
-    while(!threadInfoBlock_ptr->quit_flag) {
-        fd_set read_set;
-        fd_set write_set;
-        fd_set except_set;
-        
-        int select_result = perform_select(&read_set, &write_set, &except_set, threadInfoBlock_ptr);
-        if(select_result == -1) {
-            continue;
-        }
-
-        for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++) {
-            if(threadInfoBlock.federates[federate_index] == SLOT_ERRORED
-                || !FD_ISSET(threadInfoBlock.sockets[federate_index], &except_set)) {
-                continue;
-            }
-
-            if(federate_index != threadInfoBlock_ptr->platform_index) {
-
-                handle_external_frame(federate_index, &read_set, threadInfoBlock_ptr);
-            } else {
-                handle_internal_frame(federate_index, &write_set, threadInfoBlock_ptr);
-            } 
-        } 
-
-        if(sleep_interval_max > 0) { 
-            usleep(sleep_interval_max);
-        } 
-    } 
-
-    return (void*)NULL;
-}
-
-int perform_select(fd_set* read_set, fd_set* write_set, fd_set* except_set, struct ThreadInfoBlock* threadInfoBlock_ptr)
-{
-    FD_ZERO(read_set);
-    FD_ZERO(write_set);
-    FD_ZERO(except_set);
-
-    for(uint8_t federate_index = 0; federate_index < threadInfoBlock.nos_hosts; federate_index++) {
-        if(threadInfoBlock.federates[federate_index] == SLOT_ERRORED) {
-            continue;
-        }
-
-        if(federate_index != threadInfoBlock_ptr->platform_index) {
-            FD_SET(threadInfoBlock.sockets[federate_index], read_set);
-        } else {
-            FD_SET(threadInfoBlock.sockets[federate_index], write_set);            
-        } 
-
-        FD_SET(threadInfoBlock.sockets[federate_index], except_set);            
-    } 
-
-    return select(threadInfoBlock.max_socket_nr, read_set, write_set, except_set, NULL);
-}
-
-void handle_external_frame(uint8_t platform_index, fd_set* read_set, struct ThreadInfoBlock* threadInfoBlock_ptr) {
-    // Collect external pakets if available
-    printf("mks-memory-loop: handle_external_frame.\n");
-
-    // Where needed later
-    //pthread_mutex_lock(&access_mutex);
-    // ...
-    //pthread_mutex_unlock(&access_mutex);
-
-    if(!FD_ISSET(threadInfoBlock.sockets[platform_index], read_set)) {
-        return;
-    }
-} 
-
-void handle_internal_frame(uint8_t platform_index, fd_set* write_set, struct ThreadInfoBlock* threadInfoBlock_ptr) {
-    // Send out paket to others
-    printf("mks-memory-loop: handle_internal_frame.\n");
-
-    // Where needed later
-    //pthread_mutex_lock(&access_mutex);
-    // ...
-    //pthread_mutex_unlock(&access_mutex);
-
-    if(!FD_ISSET(threadInfoBlock.sockets[platform_index], write_set)) {
-        return;
-    }
-} 
-
-bool read_next_line_int(FILE * fp, int* value) {
-    char * line = NULL;
-    size_t len = 0;
-
-    if(fp == NULL) return false;
-
-    ssize_t read = getline(&line, &len, fp);
-    if(read == -1) return false;
-    *value = atoi(line);
-    
-    free(line);
-
-    return true;
-}
-
-bool read_next_line_string(FILE * fp, char* text) {
-    char * line = NULL;
-    size_t len = 0;
-
-    if(fp == NULL) return false;
-
-    ssize_t read = getline(&line, &len, fp);
-    if(read == -1 || read >= MKS_MAX_ADDRESS_LENGTH) return false;
-    strncpy(text, line, strlen(line));
-    
-    free(line);
-
-    return true;
-}
