@@ -8,7 +8,10 @@
 
 void* main_thread_function(void* ptr);
 
-void perform_read(fd_set* read_set, fd_set* except_set, struct ThreadInfoBlock* threadInfoBlock_ptr);
-void perform_write(fd_set* write_set, fd_set* except_set, struct ThreadInfoBlock* threadInfoBlock_ptr);
+void perform_read(struct ThreadInfoBlock* threadInfoBlock_ptr);
+void perform_write(struct ThreadInfoBlock* threadInfoBlock_ptr);
+
+void clear_frames(struct ThreadInfoBlock* threadInfoBlock_ptr);
+void clear_frame(uint8_t platform_index, struct ThreadInfoBlock* threadInfoBlock_ptr);
 
 #endif

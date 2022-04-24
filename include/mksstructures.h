@@ -21,12 +21,12 @@ struct ThreadInfoBlock {
 
     uint8_t nos_hosts;
 
-    uint8_t federates[MKS_MAX_FEDERATES];
-
-    int sockets[MKS_MAX_FEDERATES];
-    int max_socket_nr;
-
+    struct sockaddr_in addresses[MKS_MAX_FEDERATES];
+    
     uint8_t frames[MKS_MAX_FEDERATES][MKS_MAX_FRAME_SIZE];  
+
+    int socket;
+    int max_socket_nr;
 };
 
 #endif
