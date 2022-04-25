@@ -1,9 +1,9 @@
 # mks-memory-loop
 MKS Distributed (UDP) Memory Loop Library
 
-This CXX-11 library enables the simple configuration and execution of applications which share a ditributed memory environment such that each participant (federate) can provide a UDP network frame of 508 bytes to each other federate in a federation with high frequency. 
-The format and contents of these frames must be handled by the application and fit into the buffer sioze of 508 bytes. 
-Possible use cases are multiplayer games which each player provides it's data in a frame to the federation.
+This CXX-11 library enables the simple configuration and execution of applications which share a distributed memory environment such that each host participant (federate) can provide a UDP network frame of 508 bytes to each other federate in a federation with high frequency. 
+The format and contents of these frames must be handled by the application and fit into the buffer size of 508 bytes. 
+Possible use cases are multiplayer games which each player provides its data in a frame to the federation.
 
 ## Using The Library
 The library consists of two files, the header (mksmemoryloop.h) and the library archive (mksmemoryloop.a). Includew the header in your project and link with the library file.
