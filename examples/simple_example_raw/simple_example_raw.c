@@ -17,12 +17,8 @@ static bool install_sigint_signal();
 
 volatile sig_atomic_t sigint = 1;
 
-struct basic_counter {
-    uint16_t counter;
-};
-
 //
-// This example shows using a struct over the raw frame pointer between begin_frame and end_frame.
+// This example shows using the raw frame pointer between begin_frame and end_frame as is.
 //
 int main(int argc, char *argv[]) {
     // char buffer[1024];
@@ -56,15 +52,14 @@ int main(int argc, char *argv[]) {
                 // Use the frame pointer begin_frame/end_frame duration for as short a time as possible
                 // since this prevents network updates during this period. Only access 1 pair for a frame at a time
                 uint8_t* frame_pointer = mksml_begin_frame(index);
-                struct basic_counter* struct_pointer = (struct basic_counter*)frame_pointer;
-
+                
                 if(frame_pointer != NULL) {              
-                    counter = struct_pointer->counter;
+                    counter = *((uint16_t*)frame_pointer);
 
                     if(index == platform_index) {
-                        struct_pointer->counter = struct_pointer->counter + 1;
-                        if(struct_pointer->counter >= 32000) {
-                            struct_pointer->counter = 0;
+                        *((uint16_t*)frame_pointer) = *((uint16_t*)frame_pointer) + 1;
+                        if(*((uint16_t*)frame_pointer) >= 32000) {
+                            *((uint16_t*)frame_pointer) = 0;
                         }
                     }
 

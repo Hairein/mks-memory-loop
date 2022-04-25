@@ -6,7 +6,7 @@ The format and contents of these frames must be handled by the application and f
 Possible use cases are multiplayer games which each player provides its data in a frame to the federation.
 
 ## Using The Library
-The library consists of two files, the header (mksmemoryloop.h) and the library archive (mksmemoryloop.a). Includew the header in your project and link with the library file.
+The library consists of two files, the header (mksmemoryloop.h) and the library archive (mksmemoryloop.a). Include the header in your project and link with the library file.
 
 ## Sample Configuration
 3               - Number of federates/hosts
@@ -29,5 +29,5 @@ In three shells, go to the simple_example directory and run 1 for each command l
 ./simple_example ./simple_example_1.cfg
 ./simple_example ./simple_example_2.cfg
 
-You will have 3 counters running in printout and you can quit by pressing any key. The application can be restarted anytime and resumes communication witrh any other federates running.
+You will have 3 counters running in printout and you can quit by pressing any key. The application can be restarted anytime and resumes communication with any other federates running.
 

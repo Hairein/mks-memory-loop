@@ -50,55 +50,63 @@ void* main_thread_function(void* ptr) {
 }
 
 void perform_read(struct ThreadInfoBlock* threadInfoBlock_ptr) {
-    fd_set read_set;
+    while(true) {
+        fd_set read_set;
 
-    FD_ZERO(&read_set);
+        FD_ZERO(&read_set);
 
-    // check if socket is ready for reading anything
-    FD_SET(threadInfoBlock_ptr->socket, &read_set);          
+        // check if socket is ready for reading anything
+        FD_SET(threadInfoBlock_ptr->socket, &read_set);          
 
-    struct timeval timeval_nowait;
-    memset(&timeval_nowait, 0, sizeof(struct timeval));
+        struct timeval timeval_shortwait;
+        memset(&timeval_shortwait, 0, sizeof(struct timeval));
+        //timeval_shortwait.tv_usec = 5000;
+        
+        int select_result = select(threadInfoBlock_ptr->max_socket_nr, &read_set, NULL, NULL, &timeval_shortwait);
+        assert(select_result >= 0);
 
-    int select_result = select(threadInfoBlock_ptr->max_socket_nr, &read_set, NULL, NULL, &timeval_nowait);
-    assert(select_result >= 0);
-
-    // recv_from any host, confirm it's in federates
-    if(select_result > 0 && FD_ISSET(threadInfoBlock_ptr->socket, &read_set)) {
-        uint8_t temp_frame[MKS_MAX_FRAME_SIZE]; 
-        memset(&temp_frame, 0, sizeof(uint8_t) * MKS_MAX_FRAME_SIZE);
-
-        struct sockaddr src_addr; 
-        socklen_t addrlen = sizeof(struct sockaddr);
-
-        ssize_t recv_size = recvfrom(threadInfoBlock_ptr->socket, 
-            temp_frame, sizeof(uint8_t) * MKS_MAX_FRAME_SIZE,
-            0,
-            &src_addr, &addrlen);
-        assert(recv_size >= 0);
-
-        struct sockaddr_in* parsed_src_addr = (struct sockaddr_in*)&src_addr;
-
-        // find if message came from one of the hosts
-        for(uint8_t federate_index = 0; federate_index < threadInfoBlock_ptr->nos_hosts; federate_index++) {
-            if(federate_index == threadInfoBlock_ptr->platform_index) {
-                continue;
-            }
-
-            if(parsed_src_addr->sin_addr.s_addr != threadInfoBlock_ptr->addresses[federate_index].sin_addr.s_addr 
-                || parsed_src_addr->sin_port != threadInfoBlock_ptr->addresses[federate_index].sin_port) {
-                continue;
-            }
-
-            // copy temp frame to federate frame
-            memcpy(threadInfoBlock_ptr->frames[federate_index], temp_frame, MKS_MAX_FRAME_SIZE);
-            
-            // printf("mks-main_thread::perform_read: platform(%d) received frame from federate(%d) with size(%d)\n",
-            //     threadInfoBlock_ptr->platform_index,
-            //     federate_index,
-            //     (int)recv_size);
-
+        // break if nothing to read/timeout
+        if(select_result == 0) {
             break;
+        }
+
+        // if there's somewthing to read, recv_from any host, confirm it's in federates
+        if(FD_ISSET(threadInfoBlock_ptr->socket, &read_set)) {
+            uint8_t temp_frame[MKS_MAX_FRAME_SIZE]; 
+            memset(&temp_frame, 0, sizeof(uint8_t) * MKS_MAX_FRAME_SIZE);
+
+            struct sockaddr src_addr; 
+            socklen_t addrlen = sizeof(struct sockaddr);
+
+            ssize_t recv_size = recvfrom(threadInfoBlock_ptr->socket, 
+                temp_frame, sizeof(uint8_t) * MKS_MAX_FRAME_SIZE,
+                0,
+                &src_addr, &addrlen);
+            assert(recv_size >= 0);
+
+            struct sockaddr_in* parsed_src_addr = (struct sockaddr_in*)&src_addr;
+
+            // find if message came from one of the hosts
+            for(uint8_t federate_index = 0; federate_index < threadInfoBlock_ptr->nos_hosts; federate_index++) {
+                if(federate_index == threadInfoBlock_ptr->platform_index) {
+                    continue;
+                }
+
+                if(parsed_src_addr->sin_addr.s_addr != threadInfoBlock_ptr->addresses[federate_index].sin_addr.s_addr 
+                    || parsed_src_addr->sin_port != threadInfoBlock_ptr->addresses[federate_index].sin_port) {
+                    continue;
+                }
+
+                // copy temp frame to federate frame
+                memcpy(threadInfoBlock_ptr->frames[federate_index], temp_frame, MKS_MAX_FRAME_SIZE);
+                
+                // printf("mks-main_thread::perform_read: platform(%d) received frame from federate(%d) with size(%d)\n",
+                //     threadInfoBlock_ptr->platform_index,
+                //     federate_index,
+                //     (int)recv_size);
+
+                break;
+            }
         }
     }
 }
