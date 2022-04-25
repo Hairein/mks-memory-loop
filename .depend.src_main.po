@@ -1,8 +1,0 @@
-src/main.po: src/main.c /usr/include/stdio.h /usr/include/sys/cdefs.h \
-  /usr/include/sys/_null.h /usr/include/sys/_types.h \
-  /usr/include/machine/_types.h /usr/include/x86/_types.h \
-  /usr/include/machine/_limits.h /usr/include/x86/_limits.h \
-  /usr/include/stdlib.h \
-  /usr/home/mkoleoso/GitHub/mks-memory-loop/include/defines.h \
-  /usr/home/mkoleoso/GitHub/mks-memory-loop/include/main.h \
-  /usr/include/stdbool.h
