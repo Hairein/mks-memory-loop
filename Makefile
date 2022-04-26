@@ -23,7 +23,6 @@ ${LIB}.a : ${OBJS}
 	ar rcs ${LIB}.a ${OBJS}
 
 #freebsd:
-#CFLAGS+= -ansi
 #.include <bsd.lib.mk>
 
 clean:
