@@ -25,7 +25,7 @@ bool __thread is_running = false;
 
 struct ThreadInfoBlock __thread threadInfoBlock;
 
-pthread_mutex_t access_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t __thread access_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 uint8_t mksml_initialize(char* cfg_filename)
 {

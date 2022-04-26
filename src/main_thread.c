@@ -16,7 +16,7 @@
 
 #define MICROSECONDS_PER_MILLISECOND 1000
 
-extern pthread_mutex_t access_mutex;
+extern pthread_mutex_t __thread access_mutex;
 
 void* main_thread_function(void* ptr) {
     struct ThreadInfoBlock* threadInfoBlock_ptr = ptr;
@@ -24,7 +24,11 @@ void* main_thread_function(void* ptr) {
     useconds_t sleep_interval_max = threadInfoBlock_ptr->frame_interval_ms * MICROSECONDS_PER_MILLISECOND;
 
     while(!threadInfoBlock_ptr->quit_flag) {
-        pthread_mutex_lock(&access_mutex);
+        if(pthread_mutex_lock(&access_mutex) != 0) {
+            //printf("mks-main_thread::main_thread_function: error acquiring mutex lock (1)\n");
+    
+            return (void*)NULL;
+        }
 
         perform_read(threadInfoBlock_ptr);
 
@@ -33,19 +37,27 @@ void* main_thread_function(void* ptr) {
         pthread_mutex_unlock(&access_mutex);
 
         if(sleep_interval_max > 0) { 
-            usleep(sleep_interval_max);
+            if(usleep(sleep_interval_max) != 0) {
+                //printf("mks-main_thread::main_thread_function: error during usleep\n");
+            
+                return (void*)NULL;
+            }
         } 
     } 
 
     // clear the frame before quitting
-    pthread_mutex_lock(&access_mutex);
+    if(pthread_mutex_lock(&access_mutex) != 0) {
+        //printf("mks-main_thread::main_thread_function: error acquiring mutex lock (2)\n");
+    
+        return (void*)NULL;
+    }
 
     clear_frame(threadInfoBlock_ptr->platform_index, threadInfoBlock_ptr);
 
     perform_write(threadInfoBlock_ptr);
-   
-    pthread_mutex_unlock(&access_mutex);
 
+    pthread_mutex_unlock(&access_mutex);
+    
     return (void*)NULL;
 }
 
@@ -60,7 +72,7 @@ void perform_read(struct ThreadInfoBlock* threadInfoBlock_ptr) {
 
         struct timeval timeval_shortwait;
         memset(&timeval_shortwait, 0, sizeof(struct timeval));
-        //timeval_shortwait.tv_usec = 5000;
+        timeval_shortwait.tv_usec = 10;
         
         int select_result = select(threadInfoBlock_ptr->max_socket_nr, &read_set, NULL, NULL, &timeval_shortwait);
         assert(select_result >= 0);
