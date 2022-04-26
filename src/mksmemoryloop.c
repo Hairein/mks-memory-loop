@@ -120,7 +120,7 @@ uint8_t* mksml_begin_frame(uint8_t frame_index) {
 
     pthread_mutex_lock(&access_mutex);
 
-    return &threadInfoBlock.frames[frame_index][0];
+    return threadInfoBlock.frames[frame_index];
 }
 
 void mksml_end_frame() {

@@ -25,8 +25,8 @@ void* main_thread_function(void* ptr) {
 
     while(!threadInfoBlock_ptr->quit_flag) {
         if(pthread_mutex_lock(&access_mutex) != 0) {
-            //printf("mks-main_thread::main_thread_function: error acquiring mutex lock (1)\n");
-    
+            printf("mks-main_thread::main_thread_function: error acquiring mutex lock (1)\n");
+
             return (void*)NULL;
         }
 
@@ -38,7 +38,7 @@ void* main_thread_function(void* ptr) {
 
         if(sleep_interval_max > 0) { 
             if(usleep(sleep_interval_max) != 0) {
-                //printf("mks-main_thread::main_thread_function: error during usleep\n");
+                printf("mks-main_thread::main_thread_function: error during usleep\n");
             
                 return (void*)NULL;
             }
@@ -47,8 +47,8 @@ void* main_thread_function(void* ptr) {
 
     // clear the frame before quitting
     if(pthread_mutex_lock(&access_mutex) != 0) {
-        //printf("mks-main_thread::main_thread_function: error acquiring mutex lock (2)\n");
-    
+        printf("mks-main_thread::main_thread_function: error acquiring mutex lock (2)\n");
+
         return (void*)NULL;
     }
 
@@ -58,6 +58,8 @@ void* main_thread_function(void* ptr) {
 
     pthread_mutex_unlock(&access_mutex);
     
+    //printf("mks-main_thread::main_thread_function ending\n");
+
     return (void*)NULL;
 }
 
@@ -77,9 +79,9 @@ void perform_read(struct ThreadInfoBlock* threadInfoBlock_ptr) {
         int select_result = select(threadInfoBlock_ptr->max_socket_nr, &read_set, NULL, NULL, &timeval_shortwait);
         assert(select_result >= 0);
 
-        // break if nothing to read/timeout
+        // return if nothing to read/timeout
         if(select_result == 0) {
-            break;
+            return;
         }
 
         // if there's somewthing to read, recv_from any host, confirm it's in federates
