@@ -8,8 +8,11 @@ SRCS= src/mksmemoryloop.c src/main_thread.c src/file_read.c
 INCS= include/mksmemoryloop.h include/mksstructures.h include/main_thread.h include/file_read.h
 OBJS= mksmemoryloop.o main_thread.o file_read.o
 
-CFLAGS+= -std=c11 -Wall -pedantic -g 
-CFLAGS+= -I./include -I/usr/include -I/usr/local/include
+OS:= uname -o
+
+CFLAGS+= -std=c11 -Wall -pedantic 
+CFLAGS+= -g 
+CFLAGS+= -I${.CURDIR}/include -I./include -I/usr/include -I/usr/local/include
 
 LDFLAGS+= -L/usr/lib -L/usr/local/lib -lpthread
 
@@ -19,8 +22,15 @@ LDFLAGS+= -L/usr/lib -L/usr/local/lib -lpthread
 ${LIB}.a : ${OBJS}
 	ar rcs ${LIB}.a ${OBJS}
 
+#freebsd:
+#CFLAGS+= -ansi
+#.include <bsd.lib.mk>
+
 clean:
 	rm -f ${LIB}
 	rm -f *.o
 	rm -f *.a
+	rm -f *.so
 
+os_info:
+	@ $(OS)
