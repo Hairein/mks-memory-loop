@@ -77,7 +77,12 @@ void perform_read(struct ThreadInfoBlock* threadInfoBlock_ptr) {
         timeval_shortwait.tv_usec = 10;
         
         int select_result = select(threadInfoBlock_ptr->max_socket_nr, &read_set, NULL, NULL, &timeval_shortwait);
-        assert(select_result >= 0);
+        //assert(select_result >= 0);
+        if(select_result < 0) {
+            threadInfoBlock_ptr->quit_flag = true;           
+            printf("mks-main_thread::perform_read: Error on select\n");
+            return;
+        }
 
         // return if nothing to read/timeout
         if(select_result == 0) {
@@ -96,7 +101,12 @@ void perform_read(struct ThreadInfoBlock* threadInfoBlock_ptr) {
                 temp_frame, sizeof(uint8_t) * MKS_MAX_FRAME_SIZE,
                 0,
                 &src_addr, &addrlen);
-            assert(recv_size >= 0);
+            //assert(recv_size >= 0);
+            if(recv_size < 0) {
+                threadInfoBlock_ptr->quit_flag = true;           
+                printf("mks-main_thread::perform_read: Error on recvfrom\n");
+                return;
+            }
 
             struct sockaddr_in* parsed_src_addr = (struct sockaddr_in*)&src_addr;
 
@@ -139,13 +149,23 @@ void perform_write(struct ThreadInfoBlock* threadInfoBlock_ptr) {
         FD_SET(threadInfoBlock_ptr->socket, &write_set);    
 
         int select_result = select(threadInfoBlock_ptr->max_socket_nr, NULL, &write_set, NULL, NULL);
-        assert(select_result > 0);
+        //assert(select_result > 0);
+        if(select_result < 0) {
+            threadInfoBlock_ptr->quit_flag = true;           
+            printf("mks-main_thread::perform_write: Error on select\n");
+            return;
+        }
 
         ssize_t sent_size = sendto(threadInfoBlock_ptr->socket, 
             threadInfoBlock_ptr->frames[threadInfoBlock_ptr->platform_index], sizeof(unsigned char) * MKS_MAX_FRAME_SIZE,
             0,
             (struct sockaddr*)&threadInfoBlock_ptr->addresses[federate_index], sizeof(struct sockaddr_in));
-        assert(sent_size >= 0);
+        //assert(sent_size >= 0);
+        if(sent_size < 0) {
+            threadInfoBlock_ptr->quit_flag = true;           
+            printf("mks-main_thread::perform_write: Error on sendto\n");
+            return;
+        }
     }
 }
 
