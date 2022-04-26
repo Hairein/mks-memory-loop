@@ -1,4 +1,4 @@
-LIB= mksmemoryloop
+LIB= libmksmemoryloop
 
 SHLIB_MAJOR= 0
 SHLIB_MINOR= 0
