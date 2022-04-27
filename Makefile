@@ -10,7 +10,7 @@ OBJS= mksmemoryloop.o main_thread.o file_read.o
 
 OS:= uname -o
 
-CFLAGS+= -std=c11 -Wall -pedantic 
+CFLAGS+= -std=c11 -Wall -pedantic -fPIC
 CFLAGS+= -g 
 CFLAGS+= -I${.CURDIR}/include -I./include -I/usr/include -I/usr/local/include
 
@@ -21,6 +21,7 @@ LDFLAGS+= -L/usr/lib -L/usr/local/lib -lpthread
 
 ${LIB}.a : ${OBJS}
 	ar rcs ${LIB}.a ${OBJS}
+	g++ -shared -o ${LIB}.so ${OBJS}
 
 #freebsd:
 #.include <bsd.lib.mk>
