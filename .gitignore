@@ -51,7 +51,5 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-*.pico
-*.pico
-.depend*
+*.core
 .vscode/
