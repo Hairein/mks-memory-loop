@@ -1,8 +1,12 @@
 LIB= libmksmemoryloop
+HEADER= mksmemoryloop.h
 
-SHLIB_MAJOR= 0
+SHLIB_MAJOR= 1
 SHLIB_MINOR= 0
-SHLIB_TEENY= 1
+SHLIB_TEENY= 0
+
+INCLUDE_INSTALL_DIR= /usr/local/include
+LIB_INSTALL_DIR= /usr/local/lib
 
 SRCS= src/mksmemoryloop.c src/main_thread.c src/file_read.c
 INCS= include/mksmemoryloop.h include/mksstructures.h include/main_thread.h include/file_read.h
@@ -12,9 +16,9 @@ OS:= uname -o
 
 CFLAGS+= -std=c11 -Wall -pedantic -fPIC
 CFLAGS+= -g 
-CFLAGS+= -I${.CURDIR}/include -I./include -I/usr/include -I/usr/local/include
+CFLAGS+= -I${.CURDIR}/include -I./include -I/usr/include -I${INCLUDE_INSTALL_DIR}
 
-LDFLAGS+= -L/usr/lib -L/usr/local/lib -lpthread
+LDFLAGS+= -L/usr/lib -L${LIB_INSTALL_DIR} -lpthread
 
 %.o : src/%.c ${INCS} ${SRCS}
 	gcc -c ${CFLAGS} $< -o $@ ${LDFLAGS}
@@ -33,15 +37,15 @@ clean:
 	rm -f *.so
 
 install:
-	cp libmksmemoryloop.a /usr/local/lib
-	cp libmksmemoryloop.so /usr/local/lib
-	cp ./include/mksmemoryloop.h /usr/local/include
+	cp ./${LIB}.a ${LIB_INSTALL_DIR}
+	cp ./${LIB}.so ${LIB_INSTALL_DIR}/${LIB}.so.${SHLIB_MAJOR}.${SHLIB_MINOR}.${SHLIB_TEENY}
+	cp ./include/${HEADER} ${INCLUDE_INSTALL_DIR}
+	ln -s ${LIB_INSTALL_DIR}/${LIB}.so.${SHLIB_MAJOR}.${SHLIB_MINOR}.${SHLIB_TEENY} ${LIB_INSTALL_DIR}/${LIB}.so
 	ldconfig
 
 uninstall:
-	rm /usr/local/lib/libmksmemoryloop.a
-	rm /usr/local/lib/libmksmemoryloop.so
-	rm /usr/local/include/mksmemoryloop.h 
+	rm ${LIB_INSTALL_DIR}/${LIB}*
+	rm ${INCLUDE_INSTALL_DIR}/${HEADER} 
 	ldconfig
 	
 os_info:

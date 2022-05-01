@@ -7,7 +7,7 @@ CFLAGS+= -std=c11 -Wall -pedantic -g
 CFLAGS+= -I. -I/usr/include -I/usr/local/include
 LDFLAGS+= -L/usr/lib -L/usr/local/lib -lmksmemoryloop -lpthread
 
-${PROG} : ${INCS} ${SRCS} ../../libmksmemoryloop.a
+${PROG} : ${INCS} ${SRCS}
 	gcc ${CFLAGS} ${SRCS} -o ${PROG} ${LDFLAGS}
 
 clean:
