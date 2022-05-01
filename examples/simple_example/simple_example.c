@@ -55,10 +55,10 @@ int main(int argc, char *argv[]) {
 
                 // Use the frame pointer begin_frame/end_frame duration for as short a time as possible
                 // since this prevents network updates during this period. Only access 1 pair for a frame at a time
-                uint8_t* frame_pointer = mksml_begin_frame(index);
-                struct basic_counter* struct_pointer = (struct basic_counter*)frame_pointer;
-
+                uint8_t* frame_pointer = mksml_begin_frame(index); 
                 if(frame_pointer != NULL) {              
+                    struct basic_counter* struct_pointer = (struct basic_counter*)frame_pointer;
+    
                     counter = struct_pointer->counter;
 
                     if(index == platform_index) {

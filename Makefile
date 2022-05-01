@@ -32,5 +32,17 @@ clean:
 	rm -f *.a
 	rm -f *.so
 
+install:
+	cp libmksmemoryloop.a /usr/local/lib
+	cp libmksmemoryloop.so /usr/local/lib
+	cp ./include/mksmemoryloop.h /usr/local/include
+	ldconfig
+
+uninstall:
+	rm /usr/local/lib/libmksmemoryloop.a
+	rm /usr/local/lib/libmksmemoryloop.so
+	rm /usr/local/include/mksmemoryloop.h 
+	ldconfig
+	
 os_info:
 	@ $(OS)

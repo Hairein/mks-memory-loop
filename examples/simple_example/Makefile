@@ -4,8 +4,8 @@ INCS=
 MAN=
 
 CFLAGS+= -std=c11 -Wall -pedantic -g
-CFLAGS+= -I. -I/usr/include -I/usr/local/include -I../../include
-LDFLAGS+= -static -L../.. -L/usr/lib -L/usr/local/lib -lmksmemoryloop -lpthread
+CFLAGS+= -I. -I/usr/include -I/usr/local/include
+LDFLAGS+= -L/usr/lib -L/usr/local/lib -lmksmemoryloop -lpthread
 
 ${PROG} : ${INCS} ${SRCS} ../../libmksmemoryloop.a
 	gcc ${CFLAGS} ${SRCS} -o ${PROG} ${LDFLAGS}

@@ -25,7 +25,7 @@ extern void mksml_uninitialize();
 
 extern uint8_t mksml_get_platform_index();
 extern uint8_t mksml_get_nos_federates();
- 
+
 extern uint8_t* mksml_begin_frame(uint8_t frame_index);
 extern void mksml_end_frame();
 

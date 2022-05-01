@@ -51,8 +51,7 @@ int main(int argc, char *argv[]) {
 
                 // Use the frame pointer begin_frame/end_frame duration for as short a time as possible
                 // since this prevents network updates during this period. Only access 1 pair for a frame at a time
-                uint8_t* frame_pointer = mksml_begin_frame(index);
-                
+                uint8_t* frame_pointer = mksml_begin_frame(index);                  
                 if(frame_pointer != NULL) {              
                     counter = *((uint16_t*)frame_pointer);
 
