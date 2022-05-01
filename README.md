@@ -20,14 +20,23 @@ The library can be installed to/uninstalled from the /usr/local/include (header)
 
 ## Sample Configuration
 3               - Number of federates/hosts
+
 192.168.2.121   - host 0 IP
+
 13201           - host 0 port
+
 192.168.2.121   - host 1 IP
+
 13202           - host 1 port
+
 192.168.2.121   - host 2 IP
+
 13203           - host 2 port
+
 0               - platform/own federate index
+
 20              - thread network sleep time in milliseconds per frames handling
+
 
 ## Examples
 
@@ -36,9 +45,12 @@ This example uses the configuration files simple_example_[0|1|2].cfg and is inte
 
 In three shells, go to the simple_example directory and run 1 for each command line:
 
-./simple_example ./simple_example_0.cfg 
+./simple_example ./simple_example_0.cfg
+
 ./simple_example ./simple_example_1.cfg
+
 ./simple_example ./simple_example_2.cfg
+
 
 You will have 3 counters running in printout and you can quit by pressing any key. The application can be restarted anytime and resumes communication with any other federates running.
 
@@ -47,9 +59,12 @@ This example uses the configuration files simple_example_raw_[0|1|2].cfg and is 
 
 In three shells, go to the simple_example directory and run 1 for each command line:
 
-./simple_example_raw ./simple_example_raw_0.cfg 
+./simple_example_raw ./simple_example_raw_0.cfg
+
 ./simple_example_raw ./simple_example_raw_1.cfg
+
 ./simple_example_raw ./simple_example_raw_2.cfg
+
 
 You will have 3 counters running in printout and you can quit by pressing any key. The application can be restarted anytime and resumes communication with any other federates running.
 
@@ -58,9 +73,12 @@ This example uses the configuration files sfml_example_[0|1|2].cfg and is intend
 
 In three shells, go to the simple_example directory and run 1 for each command line:
 
-./sfml_example ./sfml_example_0.cfg 
+./sfml_example ./sfml_example_0.cfg
+
 ./sfml_example ./sfml_example_1.cfg
+
 ./sfml_example ./sfml_example_2.cfg
+
 
 You will have 3 circles, red, green and blue and you can quit by closing the window. The position and color data for each circle is synchronized throughout the federates on the network. The application can be restarted anytime and resumes communication with any other federates running.
 
