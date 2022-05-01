@@ -1,0 +1,5 @@
+sfml_example
+*.o
+*.core
+
+.vscode/
