@@ -2,12 +2,12 @@
 MKS Distributed (UDP) Memory Loop Library
 
 
-This C/CXX-11 library enables the simple configuration and execution of applications which share a distributed memory environment such that each host participant (federate) can provide a UDP network frame of 508 bytes to each other federate in a federation with high frequency. 
+This C/C++-11 library enables the simple configuration and execution of applications which share a distributed memory environment such that each host participant (federate) can provide a UDP network frame of 508 bytes to each other federate in a federation with high frequency. 
 The format and contents of these frames must be handled by the application and fit into the buffer size of 508 bytes. 
 Possible use cases are multiplayer games which each player provides its data in a frame to the federation.
 
 
-This library is being developed and tested using Linux (Ubuntu 20,04 LTS) and BSD (FreeBSD 13.0).
+This library is being developed and tested using Linux (Ubuntu 20.04 LTS) and BSD (FreeBSD 13.0).
 
 ## Using The Library
 The library consists of three files, the header (mksmemoryloop.h) and the library archives (mksmemoryloop.a/mksmemoryloop.so). 
@@ -68,7 +68,7 @@ In three shells, go to the simple_example directory and run 1 for each command l
 
 You will have 3 counters running in printout and you can quit by pressing any key. The application can be restarted anytime and resumes communication with any other federates running.
 
-### (sfml_example) Simple Example using the SFML library for windowing and display and a custom structure from the pointer of the frame
+### (sfml_example) Simple C++ Example using the SFML library for windowing and display and a custom structure from the pointer of the frame
 This example uses the configuration files sfml_example_[0|1|2].cfg and is intended to be lauched with 3 applications. The parameters of each application should use one of the three config files as shown below.
 
 In three shells, go to the simple_example directory and run 1 for each command line:
