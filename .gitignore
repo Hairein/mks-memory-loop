@@ -53,3 +53,7 @@ dkms.conf
 
 *.core
 .vscode/
+.depend*
+.pico
+.po
+

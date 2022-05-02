@@ -1,14 +1,14 @@
 // simple_example.c
 // Author: Micah Koleoso Software, 2021
 
-#define _POSIX_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include <SFML/Graphics.hpp>
 
